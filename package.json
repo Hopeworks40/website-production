@@ -1,0 +1,23 @@
+{
+  "name": "home-website",
+  "version": "1.0.0",
+  "description": "Website with tracking system and obfuscation",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "deploy:original": "git push origin-private main",
+    "deploy:production": "npm run build && cd dist && git init && git add . && git commit -m 'Production build' && git push -f production-public main",
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": [
+    "tracking",
+    "shipping",
+    "website"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "html-minifier-terser": "^7.2.0",
+    "clean-css": "^5.3.3"
+  }
+}
