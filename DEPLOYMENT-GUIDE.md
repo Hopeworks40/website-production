@@ -5,10 +5,12 @@ This guide explains how to maintain two GitHub repositories: one for original so
 ## Prerequisites
 
 1. **Install Node.js** (if not already installed)
+
    - Download from: https://nodejs.org/
    - Verify: `node --version`
 
 2. **Install javascript-obfuscator globally**
+
    ```powershell
    npm install -g javascript-obfuscator
    ```
@@ -83,6 +85,7 @@ cd ..
 ### Option A: Manual Workflow
 
 **Step 1: Update Original Code**
+
 ```powershell
 # Make your changes to source files
 # Then commit to private repo
@@ -93,6 +96,7 @@ git push origin main
 ```
 
 **Step 2: Build and Deploy Production**
+
 ```powershell
 # Build obfuscated version
 npm run build
@@ -157,6 +161,7 @@ The `build.js` script does the following:
 ## Obfuscation Features
 
 The following files are obfuscated:
+
 - `assets/js/tracking.js` - Tracking system logic
 - `assets/js/exces.js` - Chatbot functionality
 - `assets/js/cosent.js` - Cookie consent system
@@ -167,12 +172,14 @@ The following files are obfuscated:
 ## Security Best Practices
 
 ### For Private Repository (Source Code)
+
 - ✅ Keep config.js with real API keys (excluded by .gitignore)
 - ✅ Never push sensitive credentials
 - ✅ Use environment variables for production
 - ✅ Restrict access to trusted team members only
 
 ### For Public Repository (Production)
+
 - ✅ Use obfuscated code only
 - ✅ Remove or sanitize config.js before deploying
 - ✅ Use environment variables on server
@@ -206,11 +213,13 @@ Project Root/
 ## Testing Before Deployment
 
 1. **Build locally**
+
    ```powershell
    npm run build
    ```
 
 2. **Test dist folder**
+
    - Open `dist/index.html` in browser
    - Test tracking functionality
    - Test chatbot
@@ -224,11 +233,13 @@ Project Root/
 ## Troubleshooting
 
 ### Build fails with "javascript-obfuscator not found"
+
 ```powershell
 npm install -g javascript-obfuscator
 ```
 
 ### Git push fails with authentication error
+
 ```powershell
 # Use GitHub CLI or Personal Access Token
 # Generate token at: https://github.com/settings/tokens
@@ -236,6 +247,7 @@ npm install -g javascript-obfuscator
 ```
 
 ### Obfuscated code doesn't work
+
 - Check browser console for errors
 - Some code may not obfuscate well (reduce obfuscation options)
 - Test in dist folder before deploying
@@ -262,6 +274,7 @@ cd ..
 ## Support
 
 For issues or questions:
+
 1. Check build.js console output for errors
 2. Verify Node.js and npm are installed
 3. Ensure javascript-obfuscator is globally installed
