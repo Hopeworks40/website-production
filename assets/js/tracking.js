@@ -551,13 +551,11 @@ function showShipmentModal(shipment) {
     });
   };
 
+  // Find the first in-progress step (completed: false) for pulsing
   let currentStepIndex = -1;
   for (let i = 0; i < events.length; i++) {
-    if (
-      events[i].completed &&
-      (i === events.length - 1 || !events[i + 1].completed)
-    ) {
-      currentStepIndex = i + 1 < events.length ? i + 1 : -1;
+    if (!events[i].completed) {
+      currentStepIndex = i;
       break;
     }
   }
@@ -868,7 +866,10 @@ function showShipmentModal(shipment) {
                                             }
                                         </div>
                                         <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic;">
-                                            ${event.location}
+                                            ${
+                                              event.description ||
+                                              getStatusDescription(event.status)
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -885,70 +886,178 @@ function showShipmentModal(shipment) {
   document.body.insertAdjacentHTML("beforeend", modalHTML);
 }
 
-// Build Events Timeline
+// Get Status Description
+function getStatusDescription(status) {
+  const statusLower = status.toLowerCase();
+
+  const descriptions = {
+    // Core Life Cycle
+    confirmed: "Booking confirmed and shipment is being prepared",
+    assigned_driver: "Driver has been assigned to pick up shipment",
+    picked_up: "Driver has picked up shipment from origin",
+    arrived_origin_facility: "Shipment arrived at origin facility",
+
+    // Preparation / Origin Facility
+    prepare_for_loading: "Shipment is being prepared for loading",
+    not_loaded_due_to_payment: "Loading held - payment required",
+    storage_in_origin_facility: "Shipment stored at origin facility",
+
+    // Loading Milestones
+    loading_in_progress: "Shipment is being loaded into container",
+    loaded_onto_transport: "Shipment has been loaded onto transport",
+    loaded_into_container: "Shipment has been loaded into container",
+    loaded_into_air_flight: "Shipment has been loaded onto aircraft",
+    loaded_onto_rail: "Shipment has been loaded onto rail transport",
+    loaded_into_truck: "Shipment has been loaded into truck",
+    transport_departed: "Transport has departed with shipment",
+    transport_arrived: "Transport has arrived at destination",
+    arrived_origin_super_hub: "Arrived at origin super hub",
+    ready_for_main_carriage: "Ready for main carriage transport",
+    manifest_prepared: "Shipment manifest has been prepared",
+
+    // VESSEL / AIR / ROAD / RAIL Transit
+    arrived_at_origin_port: "Arrived at origin port",
+    arrived_at_origin_airport: "Arrived at origin airport",
+    arrived_at_origin_rail_terminal: "Arrived at origin rail terminal",
+    arrived_at_origin_transporting_hub: "Arrived at origin transport hub",
+    departed_from_origin_port: "Departed from origin port",
+    departed_from_origin_airport: "Departed from origin airport",
+    departed_from_origin_rail_terminal: "Departed from origin rail terminal",
+    departed_from_origin_transporting_hub: "Departed from origin transport hub",
+    in_transit: "Shipment is in international transit",
+    arrived_at_destination_port: "Arrived at destination port",
+    arrived_at_destination_airport: "Arrived at destination airport",
+    arrived_at_destination_rail_terminal:
+      "Arrived at destination rail terminal",
+    arrived_at_destination_transporting_hub:
+      "Arrived at destination transport hub",
+    departed_from_destination_airport: "Departed from destination airport",
+    departed_from_destination_port: "Departed from destination port",
+    departed_from_destination_rail_terminal:
+      "Departed from destination rail terminal",
+    departed_from_destination_transporting_hub:
+      "Departed from destination transport hub",
+
+    // Customs
+    arrived_for_customs_inspection: "Arrived for customs inspection",
+    customs_processing: "Customs processing in progress",
+    under_customs_inspection: "Under customs inspection",
+    customs_cleared: "Customs clearance completed successfully",
+    customs_held: "Shipment held by customs",
+    customs_rejected: "Customs clearance rejected",
+    customs_seized: "Shipment seized by customs",
+    departed_from_customs: "Departed from customs facility",
+
+    // Offloading Milestones
+    arrived_destination_super_hub: "Arrived at destination super hub",
+    prepare_for_offloading: "Preparing for offloading",
+    offloading_in_progress: "Offloading operations in progress",
+    ready_for_domestic_transfer: "Ready for domestic transfer",
+    freight_breakdown: "Freight breakdown in progress",
+    offloaded_to_terminal: "Offloaded to terminal",
+    offloaded_from_container: "Offloaded from container",
+    offloaded_from_air_flight: "Offloaded from aircraft",
+    offloaded_from_rail: "Offloaded from rail transport",
+    offloaded_from_truck: "Offloaded from truck",
+
+    // Preparation / Destination Facility
+    sorting_in_progress: "Sorting operations in progress",
+    checking_in_progress: "Quality checking in progress",
+    arrived_destination_facility: "Arrived at destination facility",
+    storage_in_destination_facility: "Stored at destination facility",
+
+    // Delivery & Collection
+    ready_for_collection: "Shipment is ready for collection",
+    out_for_delivery: "Shipment is out for delivery",
+    delivery_attempted: "Delivery attempt made - recipient unavailable",
+    ready_for_door_to_door: "Ready for door-to-door delivery",
+    delivered: "Shipment has been successfully delivered",
+    completed: "Delivery completed successfully",
+
+    // Fulfilment Milestones
+    fulfilment_order_received: "Fulfilment order received",
+    inventory_allocated: "Inventory allocated for shipment",
+    packing_in_progress: "Packing operations in progress",
+    label_generated: "Shipping label generated",
+    handed_over_to_last_mile: "Handed over to last mile carrier",
+
+    // Exceptions and Holds
+    cancelled: "Shipment has been cancelled",
+    on_hold: "Shipment is temporarily on hold",
+    delayed: "Shipment has been delayed",
+    pending: "Booking pending confirmation",
+    exception: "Exception occurred during transit",
+    route_diverted: "Route has been diverted",
+    lost_or_damaged: "Shipment reported lost or damaged",
+
+    // Detailed Holds and Actions
+    awaiting_payment: "Awaiting payment confirmation",
+    documents_required: "Additional documents required",
+    failed_collection: "Collection attempt failed",
+    held_for_inspection: "Held for inspection",
+    returned_to_sender: "Shipment is being returned to sender",
+    return_in_transit: "Return shipment in transit",
+
+    // Emergency/Force Majeure
+    weather_hold: "On hold due to adverse weather conditions",
+    strikes_hold: "On hold due to strikes or labor action",
+    accident_hold: "On hold due to accident or incident",
+    port_congestion_hold: "On hold due to port congestion",
+    civil_unrest_hold: "On hold due to civil unrest",
+  };
+
+  return descriptions[statusLower] || "Shipment is being processed";
+}
+
+// Format Status for Display
+function formatStatusForDisplay(status) {
+  return status
+    .split("_")
+    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+// Build Events Timeline - Dynamic 3-step approach
 function buildEventsFromBooking(booking) {
   const events = [];
+  const currentStatus = (booking.status || "CONFIRMED").toUpperCase();
+  const statusLower = currentStatus.toLowerCase();
 
-  const standardEvents = [
-    {
-      key: "confirmed",
-      timestamp: booking.confirmed_at || booking.created_at,
-      status: "Booking Confirmed",
-      location:
-        booking.origin_location?.name ||
-        `${booking.sender_city}, ${booking.sender_country}`,
-    },
-    {
-      key: "assigned",
-      timestamp: booking.assigned_at,
-      status: "Assigned to Carrier",
-      location: booking.current_location || "Processing",
-    },
-    {
-      key: "picked_up",
-      timestamp: booking.picked_up_at,
-      status: "Shipment Picked Up",
-      location:
-        booking.origin_location?.name ||
-        `${booking.sender_city}, ${booking.sender_country}`,
-    },
-    {
-      key: "in_transit",
-      timestamp: booking.in_transit_at,
-      status: "In Transit",
-      location: booking.current_location || "In Transit",
-    },
-    {
-      key: "customs",
-      timestamp: booking.customs_cleared_at,
-      status: "Customs Cleared",
-      location: booking.current_location || "Customs",
-    },
-    {
-      key: "out_for_delivery",
-      timestamp: booking.out_for_delivery_at,
-      status: "Out for Delivery",
-      location:
-        booking.destination_location?.name ||
-        `${booking.receiver_city}, ${booking.receiver_country}`,
-    },
-    {
-      key: "delivered",
-      timestamp: booking.delivered_at,
-      status: "Delivered",
-      location:
-        booking.destination_location?.name ||
-        `${booking.receiver_city}, ${booking.receiver_country}`,
-    },
-  ];
+  // Step 1: Booking Confirmed (always present, always completed)
+  events.push({
+    date: booking.confirmed_at || booking.created_at || new Date(),
+    status: "Booking Confirmed",
+    description: "Booking confirmed and shipment is being prepared",
+    completed: true,
+  });
 
-  standardEvents.forEach((event) => {
+  // Step 2: Current Status (only if not CONFIRMED and not DELIVERED/COMPLETED)
+  if (
+    statusLower !== "confirmed" &&
+    statusLower !== "delivered" &&
+    statusLower !== "completed"
+  ) {
     events.push({
-      date: event.timestamp ? new Date(event.timestamp) : new Date(),
-      location: event.location,
-      status: event.status,
-      completed: !!event.timestamp,
+      date: new Date(),
+      status: formatStatusForDisplay(currentStatus),
+      description: getStatusDescription(currentStatus),
+      completed: false, // Current step - will pulse
     });
+  }
+
+  // Special case: If status is CONFIRMED, mark first step as in-progress
+  if (statusLower === "confirmed") {
+    events[0].completed = false; // This will make "Booking Confirmed" pulse
+  }
+
+  // Step 3: Delivered (always present)
+  const isDelivered =
+    statusLower === "delivered" || statusLower === "completed";
+  events.push({
+    date: booking.delivered_at || new Date(),
+    status: "Delivered",
+    description: "Shipment has been successfully delivered",
+    completed: isDelivered,
   });
 
   return events;
