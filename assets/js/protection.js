@@ -236,10 +236,8 @@
     // Uncomment to enable specific protections
     // disableSelection();
     // overrideConsole();
-
-    // Run detections periodically
-    setInterval(detectDevTools, 1000);
-
+    // Run detections periodically - DISABLED to prevent false positives
+    // setInterval(detectDevTools, 1000);
     // Uncomment for aggressive detection (may impact performance)
     // setInterval(detectDevToolsWithDebugger, 1000);
     // setInterval(clearConsole, 100);
@@ -259,6 +257,8 @@
   }
 
   // Additional protection: Detect Chrome DevTools using console.log timing
+  // DISABLED - causing false positives on some browsers
+  /*
   let checkStatus = false;
   const checkTimer = setInterval(() => {
     const before = performance.now();
@@ -277,6 +277,7 @@
       }
     }
   }, 1000);
+  */
 
   // Obfuscate important variables
   const _0x = {

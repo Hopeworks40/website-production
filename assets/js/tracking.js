@@ -1022,6 +1022,42 @@ function buildEventsFromBooking(booking) {
   const events = [];
   const currentStatus = (booking.status || "CONFIRMED").toUpperCase();
   const statusLower = currentStatus.toLowerCase();
+  const isDelivered =
+    statusLower === "delivered" || statusLower === "completed";
+
+  // Use status_history if available, otherwise fall back to legacy 3-step timeline
+  if (
+    booking.status_history &&
+    Array.isArray(booking.status_history) &&
+    booking.status_history.length > 0
+  ) {
+    // Build timeline from status_history array
+    booking.status_history.forEach((historyItem, index) => {
+      const isLastItem = index === booking.status_history.length - 1;
+
+      events.push({
+        date: historyItem.timestamp || new Date(),
+        status: formatStatusForDisplay(historyItem.status),
+        description: getStatusDescription(historyItem.status),
+        location: historyItem.location || "",
+        updated_by: historyItem.updated_by || "",
+        previous_status: historyItem.previous_status || "",
+        completed: !isLastItem, // All items except the last are completed
+      });
+    });
+
+    // Always add "Delivered" as final step
+    events.push({
+      date: booking.delivered_at || new Date(),
+      status: "Delivered",
+      description: "Shipment has been successfully delivered",
+      completed: isDelivered,
+    });
+
+    return events;
+  }
+
+  // Legacy fallback: 3-step static timeline
 
   // Step 1: Booking Confirmed (always present, always completed)
   events.push({
@@ -1051,8 +1087,6 @@ function buildEventsFromBooking(booking) {
   }
 
   // Step 3: Delivered (always present)
-  const isDelivered =
-    statusLower === "delivered" || statusLower === "completed";
   events.push({
     date: booking.delivered_at || new Date(),
     status: "Delivered",
