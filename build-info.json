@@ -1,0 +1,24 @@
+{
+  "buildDate": "2025-12-31T11:24:54.135Z",
+  "version": "1.0.0",
+  "obfuscated": true,
+  "minified": true,
+  "files": {
+    "javascript": [
+      "assets/js/tracking.js",
+      "assets/js/exces.js",
+      "assets/js/cosent.js",
+      "assets/js/protection.js",
+      "assets/js/config.js",
+      "assets/js/main.js"
+    ],
+    "html": [
+      "404.html",
+      "index.html"
+    ],
+    "css": [
+      "assets\\css\\admore.css",
+      "assets\\css\\style.css"
+    ]
+  }
+}
